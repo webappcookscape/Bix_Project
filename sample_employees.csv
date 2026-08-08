@@ -1,0 +1,5 @@
+name,email,role,password,department,phone
+John Doe,john.doe@example.com,EMPLOYEE,Password123,Sales,9876543210
+Jane Smith,jane.smith@example.com,MANAGER,SecurePass456,Management,9876543211
+Alex Johnson,alex.j@example.com,SITE_SUPERVISOR,Alex@123,Installation,9876543212
+Sarah Admin,sarah@example.com,SUPER_ADMIN,AdminPass789,IT,9876543213

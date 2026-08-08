@@ -1,0 +1,6 @@
+{
+    "ignore": [
+        "backups/*.json",
+        "uploads/*"
+    ]
+}

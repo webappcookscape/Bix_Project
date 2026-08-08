@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(uuid())
+  email             String             @unique
+  passwordHash      String
+  name              String
+  role              String             @default("EMPLOYEE")
+  department        String?
+  phone             String?
+  status            String             @default("ACTIVE")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  resetOTP          String?
+  resetOTPExpires   DateTime?
+  creMonthlyReports CREMonthlyReport[] @relation("CREMonthlyReports")
+  receivedEmails    Email[]            @relation("ReceivedEmails")
+  sentEmails        Email[]            @relation("SentEmails")
+  bhProjects        Project[]          @relation("ProjectBH")
+  faProjects        Project[]          @relation("ProjectFA")
+  laProjects        Project[]          @relation("ProjectLA")
+  pushSubscriptions PushSubscription[]
+  assignedTasks     Task[]
+  architectWalkins  WalkinHubEntry[]   @relation("ArchitectWalkins")
+  bhWalkins         WalkinHubEntry[]   @relation("BHWalkins")
+  creWalkins        WalkinHubEntry[]   @relation("CREWalkins")
+  bhWorkReports     WorkReport[]       @relation("BHWorkReports")
+  creWorkReports    WorkReport[]       @relation("CREWorkReports")
+  assignedProjects  Project[]          @relation("ProjectToUser")
+}
+
+model Project {
+  id                  String               @id @default(uuid())
+  projectCode         String               @unique
+  clientPassword      String
+  name                String
+  clientFirstName     String
+  clientLastName      String
+  clientEmail         String
+  clientPhone         String
+  spouseName          String?
+  spousePhone         String?
+  location            String?
+  budget              Float?
+  paymentPercentage   Int                  @default(0)
+  cpNumber            String?              @unique
+  billingName         String?
+  billingAddress      String?
+  billingPhone        String?
+  gstin               String?
+  googleMapsLink      String?
+  latitude            Float?
+  longitude           Float?
+  startDate           DateTime?
+  deadline            DateTime?
+  handoverDate        DateTime?
+  handingOverMonth    String?
+  handingOverYear     String?
+  timelineDuration    Int                  @default(45)
+  status              String               @default("ONGOING")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  businessHeadId      String?
+  faId                String?
+  laId                String?
+  leadSource          String?
+  propertyType        String?
+  salesRep            String?
+  scopeOfWork         String?
+  area                String?
+  block               String?
+  executionPercentage Int                  @default(0)
+  floor               String?
+  unitNumber          String?
+  createdBy           String?
+  addOnsAmount        Float?
+  freezingAmount      Float?
+  freezingMailNote    String?
+  quoteLink           String?
+  variant             String?
+  woodworkAmount      Float?
+  activityLogs        ActivityLog[]
+  magicLinks          MagicLink[]
+  messages            Message[]
+  paymentTransactions PaymentTransaction[]
+  businessHead        User?                @relation("ProjectBH", fields: [businessHeadId], references: [id])
+  fa                  User?                @relation("ProjectFA", fields: [faId], references: [id])
+  la                  User?                @relation("ProjectLA", fields: [laId], references: [id])
+  documents           ProjectDocument[]
+  emails              Email[]
+  images              ProjectImage[]
+  tasks               Task[]
+  tickets             Ticket[]
+  assignedEmployees   User[]               @relation("ProjectToUser")
+}
+
+model PaymentTransaction {
+  id         String   @id @default(uuid())
+  amount     Float?
+  percentage Int
+  date       DateTime
+  time       String?
+  mode       String
+  verifiedBy String
+  projectId  String
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectImage {
+  id        String   @id @default(uuid())
+  url       String
+  caption   String?
+  projectId String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectDocument {
+  id        String   @id @default(uuid())
+  url       String
+  name      String
+  projectId String
+  taskId    String?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id])
+}
+
+model Task {
+  id                 String            @id @default(uuid())
+  title              String
+  description        String?
+  type               String            @default("TASK")
+  status             String            @default("PENDING")
+  priority           String            @default("MEDIUM")
+  stage              String?
+  projectId          String
+  employeeId         String?
+  startDate          DateTime?
+  dueDate            DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  completionFileUrl  String?
+  completionFileName String?
+  documents          ProjectDocument[]
+  employee           User?             @relation(fields: [employeeId], references: [id])
+  project            Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evidence           TaskEvidence[]
+  ticket             Ticket?
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  content     String
+  sender      String
+  senderRole  String
+  projectId   String
+  attachments String?
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model TaskEvidence {
+  id         String   @id @default(uuid())
+  url        String
+  latitude   Float
+  longitude  Float
+  capturedAt DateTime
+  taskId     String
+  createdAt  DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Email {
+  id          String   @id @default(uuid())
+  subject     String
+  content     String
+  senderId    String
+  receiverId  String?
+  projectId   String?
+  isRead      Boolean  @default(false)
+  isDraft     Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  attachments String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  receiver    User?    @relation("ReceivedEmails", fields: [receiverId], references: [id])
+  sender      User     @relation("SentEmails", fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Ticket {
+  id             String          @id @default(uuid())
+  ticketId       String          @unique
+  subject        String
+  description    String
+  category       String
+  priority       String
+  status         String          @default("Open")
+  projectId      String
+  clientEmail    String
+  attachmentUrl  String?
+  attachmentName String?
+  attachmentType String?
+  taskId         String?         @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task           Task?           @relation(fields: [taskId], references: [id])
+  comments       TicketComment[]
+}
+
+model TicketComment {
+  id        String   @id @default(uuid())
+  content   String
+  role      String
+  senderId  String?
+  ticketId  String
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model MagicLink {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  projectId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  projectId String
+  message   String
+  category  String   @default("GENERAL")
+  taskId    String?
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  keys      Json
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WalkinHubEntry {
+  id                String    @id @default(uuid())
+  creId             String
+  bhId              String?
+  clientName        String
+  contactNumber     String
+  project           String?
+  status            String?   @default("ACTIVE")
+  dateOfVisit       DateTime  @default(now())
+  dayOfVisit        String?
+  tentativeTime     String?
+  showroom          String
+  visitStatusMonday String?
+  remarks           String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  bhName            String?
+  inTime            String?
+  outTime           String?
+  architectId       String?
+  architectName     String?
+  outTimeMarkedAt   DateTime?
+  whatsappSent      Boolean   @default(false)
+  whatsappError     String?
+  whatsappSentAt    DateTime?
+  whatsappStatus    String    @default("PENDING")
+  architect         User?     @relation("ArchitectWalkins", fields: [architectId], references: [id])
+  bh                User?     @relation("BHWalkins", fields: [bhId], references: [id])
+  cre               User      @relation("CREWalkins", fields: [creId], references: [id])
+}
+
+model WorkReport {
+  id         String    @id @default(uuid())
+  date       DateTime  @default(now())
+  nextFD     DateTime?
+  clientName String
+  contact    String
+  source     String?
+  showroom   String
+  status     String?   @default("Y")
+  faName     String?
+  bhId       String?
+  site       String?
+  star       Int       @default(0)
+  remarks    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  creId      String?
+  bhName     String?
+  bh         User?     @relation("BHWorkReports", fields: [bhId], references: [id])
+  cre        User?     @relation("CREWorkReports", fields: [creId], references: [id])
+}
+
+model CREMonthlyReport {
+  id        String   @id @default(uuid())
+  creId     String
+  month     Int
+  year      Int
+  calls     Int      @default(0)
+  srv       Int      @default(0)
+  proposals Int      @default(0)
+  orders    Int      @default(0)
+  value     Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cre       User     @relation("CREMonthlyReports", fields: [creId], references: [id])
+
+  @@unique([creId, month, year])
+}

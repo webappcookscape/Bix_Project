@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Bix Projects</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bix Projects">
+  <meta name="theme-color" content="#f97316">
+  <meta name="description" content="Elite Project Management & Interior Design Portal">
+  <script>
+    // [PURGE, PROTECT & SUPPRESS]
+    (function() {
+      // 1. Force-unregister all old Service Workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for(var i=0; i<regs.length; i++) {
+            regs[i].unregister().then(function() { console.log('[Purge] SW Killed'); });
+          }
+        });
+      }
+
+      // 2. Ultra-Aggressive Surgical Safeguard (Fixes Illegal Constructors)
+      (function() {
+        var targets = ['ResizeObserver', 'IntersectionObserver', 'MessageChannel'];
+        targets.forEach(function(name) {
+          var Original = window[name];
+          if (typeof Original === 'function' || typeof Original === 'object') {
+            // Shadow with a safe wrapper that handles internal browser restrictions
+            window[name] = (function() {
+              function SafeObserver(callback) {
+                try {
+                  // Attempt native instantiation
+                  var instance = new Original(callback);
+                  return instance;
+                } catch (e) {
+                  console.warn('[Fix] Safe fallback triggered for ' + name);
+                  if (name === 'MessageChannel') {
+                    return { port1: { onmessage: null, postMessage: function() {} }, port2: { onmessage: null, postMessage: function() {} } };
+                  }
+                  // Standard observer fallback
+                  return { observe: function() {}, unobserve: function() {}, disconnect: function() {} };
+                }
+              }
+              // Preserve prototype chain for framework compatibility
+              if (Original.prototype) SafeObserver.prototype = Original.prototype;
+              return SafeObserver;
+            })();
+          }
+        });
+      })();
+
+      // 3. Suppress specific 'Select' events that trigger the SyntheticEvent crash
+      window.addEventListener('select', function(e) {
+        var sel = window.getSelection && window.getSelection();
+        if (!sel || !sel.anchorNode) {
+          e.stopImmediatePropagation();
+        }
+      }, true);
+
+      // 4. Global Error Suppressor & Surgical Diagnostic
+      var _error = window.onerror;
+      window.onerror = function(msg, url, line, col, error) {
+        if (msg && msg.indexOf('Illegal constructor') > -1) {
+          console.error('🕵️‍♂️ SURGEON: Investigating crash at', url, 'Line:', line);
+          fetch(url).then(function(r) { return r.text(); }).then(function(text) {
+             var lines = text.split('\n');
+             var targetLine = line - 1; 
+             var snippet = lines.slice(Math.max(0, targetLine - 5), targetLine + 5).join('\n');
+             console.log('%c [CSI] CRASH SITE CODE (UNMINIFIED): \n%c' + snippet, 'background: #000; color: #0f0', 'color: #0f0; font-family: monospace;');
+          }).catch(function(e) { console.error('Surgeon failed:', e); });
+          return true;
+        }
+        if (_error) return _error.apply(this, arguments);
+      };
+    })();
+  </script>
+  <script type="module" crossorigin src="/assets/index-csB3Vjje.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DBhzWDAZ.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>

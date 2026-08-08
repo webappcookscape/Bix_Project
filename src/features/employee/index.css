@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.icon-btn {
+  @apply text-gray-600 hover:text-indigo-600 transition;
+}
+
+.mobile-link {
+  @apply w-full text-left text-sm text-gray-700 hover:text-indigo-600 transition;
+}
+ 
+.badge-neutral {
+  @apply bg-gray-100 text-gray-700 px-3 py-1 rounded-md border border-gray-300 text-xs font-semibold;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-700 px-3 py-1 rounded-md border border-green-300 text-xs font-semibold;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-700 px-3 py-1 rounded-md border border-yellow-300 text-xs font-semibold;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-700 px-3 py-1 rounded-md border border-red-300 text-xs font-semibold;
+}
+.hover-highlight:hover {
+  filter: drop-shadow(0 0 5px rgba(255, 122, 0, 0.6));
+}
